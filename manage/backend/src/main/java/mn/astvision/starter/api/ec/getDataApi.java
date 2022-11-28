@@ -5,6 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import mn.astvision.starter.api.response.BaseResponse;
 import mn.astvision.starter.model.auth.User;
 import mn.astvision.starter.model.ec.City;
+import mn.astvision.starter.model.ec.District;
+import mn.astvision.starter.model.ec.ProductCategory;
+import mn.astvision.starter.repository.ec.CityRepository;
+import mn.astvision.starter.repository.ec.DistrictRepository;
+import mn.astvision.starter.repository.ec.ProductCategoryRepository;
 import org.springframework.http.*;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -46,6 +51,10 @@ public class getDataApi {
     private final JdbcTemplate jdbcTemplate;
     private final DataSource dataSource;
 
+    private final CityRepository cityRepository;
+    private final DistrictRepository districtRepository;
+    private final ProductCategoryRepository productCategoryRepository;
+
     @PostConstruct
     public void setup() {
         restTemplate = new RestTemplate();
@@ -60,40 +69,92 @@ public class getDataApi {
 //        restTemplate.setInterceptors(interceptors);
     }
 
-    @RequestMapping("getData")
-    public BaseResponse sendEcData() {
-        System.out.println("getData " + baseUrl);
+    @RequestMapping("city")
+    public BaseResponse saveCity() {
         BaseResponse response = new BaseResponse();
-//        Report requestData = new Report();
-        List<MediaType> acceptableMediaTypes = new ArrayList<MediaType>();
-        acceptableMediaTypes.add(MediaType.APPLICATION_JSON);
-        HttpHeaders headers = new HttpHeaders();
-        headers.setAccept(acceptableMediaTypes);
-        HttpEntity<Object> entity = new HttpEntity<>(headers);
 
-        System.out.println("getData 01" );
+        Connection conn = null;
+
         try {
-//            Map<String, Object> vars = new HashMap<String, Object>();
-//            System.out.println("booking ");
-//            restTemplate.getForObject(baseUrl, Object.class, vars);
-            System.out.println("yAeaaaaaah ");
-            ResponseEntity<BaseResponse> responseEntity = restTemplate.exchange(
-                    baseUrl,
-                    HttpMethod.GET,
-                    entity,
-                    BaseResponse.class);
-            System.out.println("getData 2 ");
-            if (responseEntity.getStatusCodeValue() == HttpStatus.OK.value() && responseEntity.getBody() != null) {
-                response.setData(responseEntity.getBody());
-                response.setResult(true);
+            conn = dataSource.getConnection();
+
+            String sql = "SELECT * FROM city";
+            List<Map<String, Object>> list = jdbcTemplate.queryForList(sql);
+            List<City> cityList = new ArrayList<>();
+            for (Map<String, Object> map : list) {
+                City city = new City();
+                city.setId((Integer) map.get("id"));
+                city.setName((String) map.get("name"));
+
+                System.out.println("map " + map.get("name"));
+                cityRepository.save(city);
+                cityList.add(city);
             }
-        } catch (HttpClientErrorException e) {
-            System.out.println("getData catch " + e.getMessage() );
-            log.error(e.getMessage(), e);
-            response.setResult(false);
-            response.setMessage(e.getMessage());
-        } catch (HttpStatusCodeException exception) {
-            System.out.println("error catch " + exception.getMessage() );
+            response.setData(cityList);
+            response.setResult(true);
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return response;
+    }
+
+    @RequestMapping("district")
+    public BaseResponse saveDistrict() {
+        BaseResponse response = new BaseResponse();
+
+        Connection conn = null;
+
+        try {
+            conn = dataSource.getConnection();
+
+            String sql = "SELECT * FROM district";
+            List<Map<String, Object>> list = jdbcTemplate.queryForList(sql);
+            List<District> districtList = new ArrayList<>();
+            for (Map<String, Object> map : list) {
+                District district = new District();
+                district.setId((Integer) map.get("id"));
+                district.setName((String) map.get("name"));
+                district.setCity_id((Integer) map.get("city_id"));
+
+                districtRepository.save(district);
+                districtList.add(district);
+            }
+            response.setData(districtList);
+            response.setResult(true);
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return response;
+    }
+
+    @RequestMapping("productCategory")
+    public BaseResponse saveProductCategory() {
+        BaseResponse response = new BaseResponse();
+
+        Connection conn = null;
+
+        try {
+            conn = dataSource.getConnection();
+
+            String sql = "SELECT * FROM product_category";
+            List<Map<String, Object>> list = jdbcTemplate.queryForList(sql);
+            List<ProductCategory> productCategoryList = new ArrayList<>();
+            for (Map<String, Object> map : list) {
+                ProductCategory productCategory = new ProductCategory();
+                productCategory.setId((Integer) map.get("id"));
+                productCategory.setName((String) map.get("name"));
+                productCategory.setParent_id((Integer) map.get("parent_id"));
+
+                productCategoryRepository.save(productCategory);
+                productCategoryList.add(productCategory);
+            }
+            response.setData(productCategoryList);
+            response.setResult(true);
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
         }
         return response;
     }
@@ -106,12 +167,12 @@ public class getDataApi {
 
     @RequestMapping("getDataWithMySql")
     public BaseResponse getDataWithMySql() {
-//        String url = "jdbc:mysql://127.0.0.1/ntg_license?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8&useSSL=false";
-        String username = "vehicle_license";
-        String password = "_asT^_$_velic";
-        String url = "jdbc:mysql://10.3.101.122/ntg?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8&useSSL=false";
-
-        System.out.println("getDataWithMySql " + url);
+////        String url = "jdbc:mysql://127.0.0.1/ntg_license?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8&useSSL=false";
+//        String username = "vehicle_license";
+//        String password = "_asT^_$_velic";
+//        String url = "jdbc:mysql://10.3.101.122/ntg?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8&useSSL=false";
+//
+//        System.out.println("getDataWithMySql " + url);
         BaseResponse response = new BaseResponse();
 
         Connection conn = null;
@@ -123,8 +184,16 @@ public class getDataApi {
             List<Map<String, Object>> list = jdbcTemplate.queryForList(sql);
             List<City> cityList = new ArrayList<>();
             for (Map<String, Object> map : list) {
+                City city = new City();
+                city.setId((Integer) map.get("id"));
+                city.setName((String) map.get("name"));
+
                 System.out.println("map " + map.get("name"));
+                cityRepository.save(city);
+                cityList.add(city);
             }
+            response.setData(cityList);
+            response.setResult(true);
 
         } catch (SQLException throwables) {
             throwables.printStackTrace();

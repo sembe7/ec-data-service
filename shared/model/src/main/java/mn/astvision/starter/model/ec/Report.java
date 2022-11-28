@@ -3,11 +3,10 @@ package mn.astvision.starter.model.ec;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import mn.astvision.starter.model.ec.enums.ReportStatus;
+import org.springframework.data.annotation.Id;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * @author Sembe
@@ -15,21 +14,21 @@ import java.util.Set;
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Report {
+    @Id
+    private int license_id;
 
-    private int licenseId;
+    private LocalDateTime created_date;
+    private LocalDateTime updated_date;
+    private LocalDateTime submitted_date;
+    private ReportStatus report_status;
+    private LocalDateTime closed_date;
+    private LocalDateTime replied_date;
+    private short entity_type;
 
-    private LocalDateTime createdDate;
-    private LocalDateTime updatedDate;
-    private LocalDateTime submittedDate;
-    private ReportStatus reportStatus;
-    private LocalDateTime closedDate;
-    private LocalDateTime repliedDate;
-    private short entityType;
+    private String registry_number;
 
-    private String registryNumber;
-
-    private String companyName;
-    private String directorName;
+    private String company_name;
+    private String director_mame;
     private String lastname;
     private String firstname;
 
@@ -37,24 +36,20 @@ public class Report {
 
     private String email;
 
-    private District district;
+    private Integer district_zip;
     private String quarter;
     private String street;
     private String address;
 
-    private String insuranceCompany;
-    private LocalDate insuranceExpiryDate;
-    private String driverLastname;
-    private String driverFirstname;
-    private String driverLicenseClass;
-    private String driverLicenseNumber;
-    private String driverProLicenseClass;
-    private String driverProLicenseNumber;
-    private Short inBusinessSince;
-    private Boolean hasParking;
-    private Boolean hasEngineer;
-    private Set<ReportData> reportDatas = new HashSet<>(0);
-
-    private String action;
-    private String actionParam;
+    private String insurance_company;
+    private LocalDate insurance_expiry_date;
+    private String driver_lastname;
+    private String driver_firstname;
+    private String driver_license_class;
+    private String driver_license_number;
+    private String driver_pro_license_class;
+    private String driver_pro_license_number;
+    private Short in_business_since;
+    private Boolean has_parking;
+    private Boolean has_engineer;
 }

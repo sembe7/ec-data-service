@@ -1,18 +1,16 @@
 package mn.astvision.starter.model.ec;
 
 import lombok.Data;
+import mn.astvision.starter.model.BaseEntity;
 import org.springframework.data.annotation.Id;
-
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * @author Sembe
  */
 @Data
-public class City {
+public class ProductCategory {
     @Id
     private Integer id;
     private String name;
-    private Set<District> districts = new HashSet<>(0);
+    private Integer parent_id;
 }
